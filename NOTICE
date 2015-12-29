@@ -1,0 +1,3 @@
+This software contains code derived from the aiohttp project (cf.:
+https://github.com/KeepSafe/aiohttp). It re-uses, and backports to python2, the
+multipart.MultipartReader class and its dependencies.

@@ -1,0 +1,7 @@
+recursive-include multipart_reader *
+include AUTHORS
+include CHANGELOG
+include LICENSE
+include NOTICE
+include README.rst
+include VERSION
