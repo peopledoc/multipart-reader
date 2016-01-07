@@ -67,8 +67,8 @@ class PartReaderTestCase(TestCase):
         result = obj.next()
         self.assertEqual(b'Hello, world!', result)
         self.assertTrue(obj.at_eof())
-        result = obj.next()
-        self.assertIsNone(result)
+        with self.assertRaises(StopIteration):
+            obj.next()
 
     def test_read(self):
         obj = multipart.BodyPartReader(
@@ -122,6 +122,14 @@ class PartReaderTestCase(TestCase):
         self.assertEqual(b'Hello,', result)
         result = obj.read()
         self.assertIsNone(result)
+        self.assertTrue(obj.at_eof())
+
+    def test_iterate(self):
+        obj = multipart.BodyPartReader(
+            self.boundary, {}, Stream(b'Hello,\r\n--:\r\n\r\nworld!\r\n--:--'))
+        expected = [b'Hello,', b'world!']
+        for part in obj:
+            self.assertEqual(part, expected.pop(0))
         self.assertTrue(obj.at_eof())
 
     def test_read_multiline(self):
@@ -432,8 +440,8 @@ class MultipartReaderTestCase(TestCase):
             Stream(b'--:\r\n\r\necho\r\n--:--'))
         reader.release()
         self.assertTrue(reader.at_eof())
-        res = reader.next()
-        self.assertIsNone(res)
+        with self.assertRaises(StopIteration):
+            reader.next()
 
     def test_second_next_releases_previous_object(self):
         reader = multipart.MultipartReader(
@@ -463,11 +471,12 @@ class MultipartReaderTestCase(TestCase):
                    b'--:--'))
         first = reader.next()
         second = reader.next()
-        third = reader.next()
+
+        with self.assertRaises(StopIteration):
+            reader.next()
+
         self.assertTrue(first.at_eof())
         self.assertTrue(second.at_eof())
-        self.assertTrue(second.at_eof())
-        self.assertIsNone(third)
 
     def test_read_chunk_doesnt_breaks_reader(self):
         reader = multipart.MultipartReader(
@@ -479,10 +488,7 @@ class MultipartReaderTestCase(TestCase):
                    b'Content-Length: 6\r\n\r\n'
                    b'passed'
                    b'\r\n--:--'))
-        while True:
-            part = reader.next()
-            if part is None:
-                break
+        for part in reader:
             while not part.at_eof():
                 part.read_chunk(3)
 
