@@ -171,8 +171,20 @@ class BodyPartReader(object):
         self._read_bytes = 0
         self._unread = deque()
 
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        # for Python 3
+        return self.next()
+
     def next(self):
-        return self.read()
+        data = self.read()
+
+        if data is None:
+            raise StopIteration()
+
+        return data
 
     def read(self, decode=False):
         """Reads body part data.
@@ -394,23 +406,27 @@ class MultipartReader(object):
         """
         return self._at_eof
 
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        # for Python 3
+        return self.next()
+
     def next(self):
         """Emits the next multipart body part."""
         if self._at_eof:
-            return
+            raise StopIteration()
         self._maybe_release_last_part()
         self._read_boundary()
         if self._at_eof:  # we just read the last boundary, nothing to do there
-            return
+            raise StopIteration()
         self._last_part = self.fetch_next_part()
         return self._last_part
 
     def release(self):
         """Reads all the body parts to the void till the final boundary."""
-        while not self._at_eof:
-            item = self.next()
-            if item is None:
-                break
+        for item in self:
             item.release()
 
     def fetch_next_part(self):
