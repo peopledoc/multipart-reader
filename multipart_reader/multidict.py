@@ -5,6 +5,7 @@ multidict. It behaves mostly like a dict but it can have
 several values for the same key.
 """
 
+from builtins import str
 
 __all__ = ('MultiDict', 'MultiDictProxy', 'CIMultiDict')
 
@@ -366,7 +367,7 @@ class _KeysView(_ViewBase):
         if isinstance(other, _KeysView):
             other = [o[0] for o in other._items]
         if self.isCI:
-            other = [o if not isinstance(o, basestring) else o.upper()
+            other = [o if not isinstance(o, str) else o.upper()
                      for o in other]
         return set(other)
 

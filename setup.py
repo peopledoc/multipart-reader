@@ -27,6 +27,7 @@ setup(
     url='https://github.com/novafloss/multipart-reader',
     license='MIT',
     install_requires=[
+        'future',
         'setuptools>=17.1',
     ],
     extras_require={

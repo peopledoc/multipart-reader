@@ -155,32 +155,32 @@ class _BaseTest(_Root):
     def test_keys_is_set_less(self):
         d = self.make_dict([('key', 'value1')])
 
-        self.assertLess(d.keys(), self._set({'key', 'key2'}))
+        self.assertLess(set(d.keys()), self._set({'key', 'key2'}))
 
     def test_keys_is_set_less_equal(self):
         d = self.make_dict([('key', 'value1')])
 
-        self.assertLessEqual(d.keys(), self._set({'key'}))
+        self.assertLessEqual(set(d.keys()), self._set({'key'}))
 
     def test_keys_is_set_equal(self):
         d = self.make_dict([('key', 'value1')])
 
-        self.assertEqual(d.keys(), self._set({'key'}))
+        self.assertEqual(set(d.keys()), self._set({'key'}))
 
     def test_keys_is_set_greater(self):
         d = self.make_dict([('key', 'value1')])
 
-        self.assertGreater(self._set({'key', 'key2'}), d.keys())
+        self.assertGreater(self._set({'key', 'key2'}), set(d.keys()))
 
     def test_keys_is_set_greater_equal(self):
         d = self.make_dict([('key', 'value1')])
 
-        self.assertGreaterEqual(self._set({'key'}), d.keys())
+        self.assertGreaterEqual(self._set({'key'}), set(d.keys()))
 
     def test_keys_is_set_not_equal(self):
         d = self.make_dict([('key', 'value1')])
 
-        self.assertNotEqual(d.keys(), self._set({'key2'}))
+        self.assertNotEqual(set(d.keys()), self._set({'key2'}))
 
     def test_eq(self):
         d = self.make_dict([('key', 'value1')])

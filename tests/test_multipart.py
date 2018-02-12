@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 import io
 
-import unittest2
+try:
+    import unittest2
+except ImportError:
+    import unittest as unittest2
 
 from multipart_reader import multipart
 from multipart_reader.hdrs import (
