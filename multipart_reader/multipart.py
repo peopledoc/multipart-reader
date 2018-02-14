@@ -5,8 +5,6 @@ import re
 import warnings
 import zlib
 
-from urllib import unquote
-from urlparse import parse_qsl
 from collections import deque
 
 from . import hdrs
@@ -14,6 +12,7 @@ from . import hdrs
 from .helpers import parse_mimetype
 from .multidict import CIMultiDict
 from .protocol import HttpParser
+from .compat import parse_qsl, unquote
 
 
 __all__ = ('MultipartReader',
@@ -109,7 +108,7 @@ def parse_content_disposition(header):
                 continue
 
             try:
-                value = unquote(value).decode(encoding, 'strict')
+                value = unquote(value, encoding, 'strict')
             except UnicodeDecodeError:
                 warnings.warn(BadContentDispositionParam(item))
                 continue
@@ -152,7 +151,9 @@ def content_disposition_filename(params):
         if "'" in value:
             encoding, _, value = value.split("'", 2)
             encoding = encoding or 'utf-8'
-            return unquote(value).decode(encoding, 'strict')
+
+            return unquote(value, encoding, 'strict')
+
         return value
 
 
@@ -225,7 +226,7 @@ class BodyPartReader(object):
         self._read_bytes += len(chunk)
         if self._read_bytes == self._length:
             self._at_eof = True
-            assert '\r\n' == self._content.readline(), \
+            assert b'\r\n' == self._content.readline(), \
                 'reader did not read all the data or it is malformed'
         return chunk
 
@@ -245,9 +246,9 @@ class BodyPartReader(object):
         if line.startswith(self._boundary):
             # the very last boundary may not come with \r\n,
             # so set single rules for everyone
-            sline = line.rstrip('\r\n')
+            sline = line.rstrip(b'\r\n')
             boundary = self._boundary
-            last_boundary = self._boundary + '--'
+            last_boundary = self._boundary + b'--'
             # ensure that we read exactly the boundary, not something alike
             if sline == boundary or sline == last_boundary:
                 self._at_eof = True
@@ -256,7 +257,7 @@ class BodyPartReader(object):
         else:
             next_line = self._content.readline()
             if next_line.startswith(self._boundary):
-                line = line.rstrip('\r\n')  # strip CRLF but only once
+                line = line.rstrip(b'\r\n')  # strip CRLF but only once
             self._unread.append(next_line)
 
         return line
@@ -346,9 +347,9 @@ class BodyPartReader(object):
         encoding = self.headers[hdrs.CONTENT_ENCODING].lower()
 
         if encoding == 'deflate':
-            return zlib.decompress(str(data), -zlib.MAX_WBITS)
+            return zlib.decompress(bytes(data), -zlib.MAX_WBITS)
         elif encoding == 'gzip':
-            return zlib.decompress(str(data), 16 + zlib.MAX_WBITS)
+            return zlib.decompress(bytes(data), 16 + zlib.MAX_WBITS)
         elif encoding == 'identity':
             return data
         else:
@@ -474,7 +475,7 @@ class MultipartReader(object):
         chunk = self._readline().rstrip()
         if chunk == self._boundary:
             pass
-        elif chunk == self._boundary + '--':
+        elif chunk == self._boundary + b'--':
             self._at_eof = True
         else:
             raise ValueError('Invalid boundary %r, expected %r'

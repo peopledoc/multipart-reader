@@ -19,7 +19,7 @@ class MultipartReaderTestCase(unittest.TestCase):
 
     def _to_stream(self, content):
         stream = io.BytesIO()
-        stream.write(content)
+        stream.write(content.encode('utf-8'))
         stream.seek(0)
         return stream
 
