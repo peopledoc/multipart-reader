@@ -381,6 +381,14 @@ class BodyPartReader(object):
             self.headers.get(hdrs.CONTENT_DISPOSITION))
         return content_disposition_filename(params)
 
+    @property
+    def content_type(self):
+        ctype = self.headers.get(hdrs.CONTENT_TYPE, '')
+        if ';' not in ctype:
+            return ctype
+        _, _, _, params = parse_mimetype(ctype)
+        return params.get('type', ctype)
+
 
 class MultipartReader(object):
     """Multipart body reader."""
